@@ -1,0 +1,33 @@
+version: "3.8"
+
+services:
+  postgres-db:
+    image: postgres:16
+    container_name: cloudcart-db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 12345
+      POSTGRES_DB: cloudcart
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  backend:
+    build: ./backend
+    container_name: cloudcart-backend
+    ports:
+      - "3000:3000"
+    depends_on:
+      - postgres-db
+
+  frontend:
+    build: ./frontend
+    container_name: cloudcart-frontend
+    ports:
+      - "5173:5173"
+    depends_on:
+      - backend
+
+volumes:
+  pgdata:
