@@ -6,136 +6,102 @@ function App() {
 
   const [name, setName] = useState("");
   const [price, setPrice] = useState("");
-  const [imageUrl, setImageUrl] = useState("");
-  const [editingId, setEditingId] = useState(null);
+  const [image, setImage] = useState("");
+
+  const API = "http://54.198.135.28:3000/products";
+
+  // GET all products
+  const fetchProducts = async () => {
+    try {
+      const res = await axios.get(API);
+      setProducts(res.data);
+    } catch (err) {
+      console.log("GET error:", err);
+    }
+  };
 
   useEffect(() => {
     fetchProducts();
   }, []);
 
-  const fetchProducts = async () => {
-    try {
-      const res = await axios.get("http://localhost:3000/products");
-      setProducts(res.data);
-    } catch (err) {
-      console.log(err);
-    }
-  };
-
+  // ADD product
   const addProduct = async () => {
     try {
-      const res = await axios.post("http://localhost:3000/products", {
+      await axios.post(API, {
         name,
         price,
-        image_url: imageUrl,
+        image_url: image,
       });
-
-      setProducts([...products, res.data]);
 
       setName("");
       setPrice("");
-      setImageUrl("");
-    } catch (err) {
-      console.log(err);
-    }
-  };
-
-  const deleteProduct = async (id) => {
-    try {
-      await axios.delete(`http://localhost:3000/products/${id}`);
-
-      setProducts(products.filter((p) => p.id !== id));
-    } catch (err) {
-      console.log(err);
-    }
-  };
-
-  const startEdit = (product) => {
-    setEditingId(product.id);
-    setName(product.name);
-    setPrice(product.price);
-    setImageUrl(product.image_url);
-  };
-
-  const updateProduct = async () => {
-    try {
-      await axios.put(`http://localhost:3000/products/${editingId}`, {
-        name,
-        price,
-        image_url: imageUrl,
-      });
+      setImage("");
 
       fetchProducts();
-
-      setEditingId(null);
-      setName("");
-      setPrice("");
-      setImageUrl("");
     } catch (err) {
-      console.log(err);
+      console.log("ADD error:", err);
+    }
+  };
+
+  // DELETE product
+  const deleteProduct = async (id) => {
+    try {
+      await axios.delete(`${API}/${id}`);
+      fetchProducts();
+    } catch (err) {
+      console.log("DELETE error:", err);
     }
   };
 
   return (
     <div style={{ padding: "20px" }}>
-      <h1>CloudCart</h1>
+      <h1>CloudCart 🚀</h1>
 
+      {/* ADD FORM */}
       <div style={{ marginBottom: "20px" }}>
         <input
           placeholder="Product Name"
           value={name}
           onChange={(e) => setName(e.target.value)}
         />
+        <br />
 
         <input
           placeholder="Price"
           value={price}
           onChange={(e) => setPrice(e.target.value)}
         />
+        <br />
 
         <input
           placeholder="Image URL"
-          value={imageUrl}
-          onChange={(e) => setImageUrl(e.target.value)}
+          value={image}
+          onChange={(e) => setImage(e.target.value)}
         />
+        <br />
 
-        {editingId ? (
-          <button onClick={updateProduct}>
-            Update Product
-          </button>
-        ) : (
-          <button onClick={addProduct}>
-            Add Product
-          </button>
-        )}
+        <button onClick={addProduct}>Add Product</button>
       </div>
 
-      {products.map((product) => (
+      {/* PRODUCT LIST */}
+      {products.map((p) => (
         <div
-          key={product.id}
+          key={p.id}
           style={{
             border: "1px solid #ddd",
             padding: "15px",
-            marginBottom: "15px",
-            width: "320px",
+            marginBottom: "10px",
+            width: "300px",
           }}
         >
-          <img
-            src={product.image_url}
-            alt={product.name}
-            width="250"
-          />
+          <img src={p.image_url} alt={p.name} width="200" />
 
-          <h3>{product.name}</h3>
-          <p>${product.price}</p>
-
-          <button onClick={() => startEdit(product)}>
-            Edit
-          </button>
+          <h3>{p.name}</h3>
+          <p>${p.price}</p>
 
           <button
-            onClick={() => deleteProduct(product.id)}
-            style={{ marginLeft: "10px" }}
+            onClick={() => deleteProduct(p.id)}
+            style={{ background: "red", color: "white" }}
           >
             Delete
           </button>
